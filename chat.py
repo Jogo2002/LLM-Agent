@@ -15,14 +15,27 @@ class Chat:
         ]
     def send_message(self, message):
         self.messages.append(
-            'role': 'user'
-            'content': message
-            )
+            {
+                'role': 'user',
+                'content': message
+            })
         chat_completion = self.client.chat.completions.create(
-            self.messages,
+            messages=self.messages,
             model="llama-3.1-8b-instant",
         ) 
-        return chat_completion.choices[0].messages.content
+        return chat_completion.choices[0].message.content
+
+
+if __name__ == '__main__': 
+    import readline
+    chat = Chat()
+    try:
+        while True:  
+            user_input = input("chat>> ")
+            response = chat.send_message(user_input)
+            print(response)
+    except KeyboardInterrupt: 
+        print() 
 
         
 # client = Groq(
