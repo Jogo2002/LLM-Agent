@@ -5,6 +5,10 @@ import os
 load_dotenv()
 
 class Chat: 
+    '''
+    >>> chat = Chat()
+    >>> chat.send_message('my name is bob')
+    '''
     client = Groq()
     def __init__(self): 
         self.messages = [
