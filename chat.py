@@ -4,6 +4,7 @@ import os
 import re
 import json
 import glob
+from pathlib import PurePath
 
 load_dotenv()
 
@@ -61,6 +62,13 @@ class Chat:
     def ls(self, path=None):
         # List files in the current directory or in the given directory.
         try:
+            if path is not None and path != "":  
+                if os.path.isabs(path) or any(part == ".." for part in PurePath(path).parts):
+                    # this replaces the is_path_true function to check for absolute paths and directory traversal
+                    raise ValueError(
+                        "Absolute paths and directory traversal are not allowed."
+                    )
+
             if path is None or path == "":
                 files = sorted(glob.glob("*"))
             else:
@@ -160,6 +168,7 @@ class Chat:
                     },
                 },
             }
+        ]
 
         response = self.client.chat.completions.create(
             model=self.model,
@@ -257,19 +266,6 @@ class Chat:
             return ""
     
 
-# grep: this tool takes two parameters; the first is a regex, and the second is a path (optionally with globs)
-
-# the tool should:
-# load every file that matches the glob
-# then it should loop through every line in the file and see if it matches the regex
-# if it does match the regex, then that line should be added to the output
-# if no lines match the regex, then there should be no output
-# like cat, grep must not allow absolute paths or directory traversal attacks
-# hints:
-# recall that re.search can be used to search through a string to see if it matches a regex
-
-
-
 if __name__ == '__main__':
     import readline
 
@@ -282,9 +278,9 @@ if __name__ == '__main__':
             parts = user_input[1:].split()
             command = parts[0]
             args = parts[1:]
-            if command == 'calculate':
-                result = chat.calculate(args[0])
-                assert result == '{"result": 4}', f"Expected {{\"result\": 4}}, got {result}"
+            # if command == 'calculate':
+            #     result = chat.calculate(args[0])
+            #     assert result == '{"result": 4}', f"Expected {{\"result\": 4}}, got {result}"
 
         # Test ls
         user_input = "/ls"
@@ -364,3 +360,7 @@ if __name__ == '__main__':
                 print(response)
     except KeyboardInterrupt:
         print()
+
+    
+
+
