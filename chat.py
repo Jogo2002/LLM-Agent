@@ -219,7 +219,7 @@ class Chat:
                 "type": "function",
                 "function": {
                     "name": "ls",
-                    "description": "List files in the current directory or in a specified directory",
+                    "description": "List all files and directories in a directory. Use this when the user asks what files are in a directory or to list contents. Do NOT use this to read file contents.",
                     "parameters": {
                         "type": "object",
                         "properties": {
@@ -257,7 +257,7 @@ class Chat:
                 "type": "function",
                 "function": {
                     "name": "cat",
-                    "description": "Read the contents of a file",
+                    "description": "Read and display the complete contents of a single file. Use this when the user asks to read, view, show, or display a file's content.",
                     "parameters": {
                         "type": "object",
                         "properties": {
@@ -321,6 +321,65 @@ class Chat:
 
         return response_message.content
 
+    def compact(self):
+        """Summarize the current chat session and replace messages with a single summary entry.
+        
+        This reduces token count by condensing the conversation history into 1-5 lines,
+        which helps reduce API costs, improve response speed, and prevent hitting token limits.
+
+        >>> from unittest.mock import Mock
+        >>> mock_client = Mock()
+        >>> mock_response = Mock()
+        >>> mock_message = Mock()
+        >>> mock_message.content = 'Summary: User asked about files and tools.'
+        >>> mock_choice = Mock()
+        >>> mock_choice.message = mock_message
+        >>> mock_response.choices = [mock_choice]
+        >>> mock_client.chat.completions.create.return_value = mock_response
+        >>> chat = Chat(client=mock_client)
+        >>> chat.messages.append({"role": "user", "content": "What files are in the directory?"})
+        >>> initial_len = len(chat.messages)
+        >>> result = chat.compact()
+        >>> len(chat.messages)
+        1
+        >>> chat.messages[0]["role"]
+        'system'
+        >>> 'Summary' in chat.messages[0]["content"]
+        True
+        """
+        if self.client is None:
+            return "Groq client is required to compact the conversation."
+        
+        # Create summary prompt
+        summary_prompt = (
+            "Please provide a concise 1-5 line summary of this conversation. "
+            "Include only the key points and decisions made."
+        )
+        
+        # Create a temporary chat instance to generate the summary
+        summary_messages = self.messages + [
+            {"role": "user", "content": summary_prompt}
+        ]
+        
+        try:
+            response = self.client.chat.completions.create(
+                model=self.model,
+                messages=summary_messages,
+            )
+            summary = response.choices[0].message.content
+            
+            # Replace messages with system message and summary
+            self.messages = [
+                {
+                    "role": "system",
+                    "content": f"Summary of previous conversation: {summary}",
+                }
+            ]
+            
+            return f"Conversation compacted. Summary: {summary}"
+        except Exception as e:
+            return f"Error compacting conversation: {str(e)}"
+
 
 def main():
     """Start the chat command line interface.
@@ -346,6 +405,8 @@ def main():
     ...         return f"CAT:{filename}"
     ...     def run_conversation(self, user_prompt):
     ...         return f"CHAT:{user_prompt}"
+    ...     def compact(self):
+    ...         return "Conversation compacted."
 
     >>> builtins.input = lambda prompt: next(inputs)
     >>> os.getenv = lambda key: None
@@ -355,12 +416,14 @@ def main():
     ...     "/",
     ...     "/calculate",
     ...     "/calculate 2+2",
+    ...     "/calculate 4 + 5",
     ...     "/ls",
     ...     "/ls dir",
     ...     "/grep",
     ...     "/grep a file.txt",
     ...     "/cat",
     ...     "/cat file.txt",
+    ...     "/compact",
     ...     "/unknown cmd",
     ...     "hello",
     ... ])
@@ -377,12 +440,14 @@ def main():
     Invalid command
     Usage: /calculate <expression>
     CALC:2+2
+    CALC:4 + 5
     LS:None
     LS:dir
     Usage: /grep <regex> <filepath>
     GREP:a:file.txt
     Usage: /cat <filename>
     CAT:file.txt
+    Conversation compacted.
     Unknown command: unknown
     CHAT:hello
     <BLANKLINE>
@@ -400,7 +465,7 @@ def main():
         while True:
             user_input = input("chat>> ")
             if user_input.startswith("/"):
-                parts = user_input[1:].split()
+                parts = user_input[1:].split(maxsplit=1)
                 if not parts:
                     print("Invalid command")
                     continue
@@ -413,15 +478,21 @@ def main():
                 elif command == "ls":
                     print(chat.ls(args[0] if args else None))
                 elif command == "grep":
-                    if len(args) != 2:
+                    if len(args) != 1:
                         print("Usage: /grep <regex> <filepath>")
                         continue
-                    print(chat.grep(args[0], args[1]))
+                    grep_parts = args[0].split(maxsplit=1)
+                    if len(grep_parts) != 2:
+                        print("Usage: /grep <regex> <filepath>")
+                        continue
+                    print(chat.grep(grep_parts[0], grep_parts[1]))
                 elif command == "cat":
                     if len(args) != 1:
                         print("Usage: /cat <filename>")
                         continue
                     print(chat.cat(args[0]))
+                elif command == "compact":
+                    print(chat.compact())
                 else:
                     print(f"Unknown command: {command}")
             else:
