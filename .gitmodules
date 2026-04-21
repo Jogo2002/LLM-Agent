@@ -1,9 +1,0 @@
-[submodule "test_projects/webpage"]
-	path = test_projects/webpage
-	url = https://github.com/jogo2002/Jogo2002.github.io
-[submodule "test_projects/markdown_compiler"]
-	path = test_projects/markdown_compiler
-	url = https://github.com/jogo2002/Markdown-Compiler
-[submodule "test_projects/ebay_scraper"]
-	path = test_projects/ebay_scraper
-	url = https://github.com/jogo2002/eBay-Webscrape
