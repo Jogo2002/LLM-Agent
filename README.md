@@ -39,17 +39,32 @@ chat> is this legal?
 Yes. It is generally legal to scrape webpages, but ebay offers an API that would be more efficient to use.
 ```
 
-Each example above is good because it shows how the chat tool can answer real-world questions about code and project usage, making it valuable for both technical and non-technical users.
+
+### Personal Website
+
+This example shows how the chat tool can quickly analyze and answer questions about your portfolio projects without manually reading through files.
+
+```sh
+$ cd jogo2002.github.io
+$ chat
+chat> what programming languages does this project use?
+This project uses HTML, CSS, and JavaScript. The index.html file imports a stylesheet.css and includes JavaScript functionality.
+chat> are there any broken links in the markdown?
+I found 3 markdown files. None of them contain broken http links.
+```
+
+Each example above is useful, as shows how the chat tool can answer real-world questions about code and project usage, making it valuable for both technical and non-technical users.
 
 ---
 
 ## Project Structure
 - Command-line chat interface
-- Calculate math expressions
-- List files in directories
-- Read file contents
-- Search files with regex
-- Optional LLM support via Groq
+- Tools 
+    - Calculate math expressions
+    - List files in directories
+    - Read file contents
+    - Search files with regex
+    - Summarize information
 
 ## Testing & Linting
 - **Doctests**: Run `python -m doctest chat.py tools/cat.py tools/grep.py tools/ls.py`
