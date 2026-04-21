@@ -71,6 +71,3 @@ Each example above is useful, as shows how the chat tool can answer real-world q
 - **Lint**: Run `flake8 .`
 - **Integration Tests**: Run `python -m unittest discover`
 
----
-
-For more, see the [docs](https://github.com/Jogo2002/LLM-Agent).
