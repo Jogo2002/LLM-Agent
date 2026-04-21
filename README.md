@@ -3,11 +3,11 @@
 
 A command-line tool for chat-based file utilities, including calculation, file listing, file reading, and pattern search, with optional LLM integration. Designed for extensibility and easy automation.
 
-[![Doctests](https://github.com/jogo2002/docsum/actions/workflows/doctest.yml/badge.svg)](https://github.com/yourusername/docsum/actions/workflows/doctest.yml)
-[![Lint](https://github.com/jogo2002/docsum/actions/workflows/lint.yml/badge.svg)](https://github.com/yourusername/docsum/actions/workflows/lint.yml)
-[![Integration Tests](https://github.com/jogo2002/docsum/actions/workflows/integration.yml/badge.svg)](https://github.com/yourusername/docsum/actions/workflows/integration.yml)
-[![PyPI version](https://img.shields.io/pypi/v/docsum.svg)](https://pypi.org/project/docsum/)
-[![codecov](https://codecov.io/gh/jogo2002/docsum/branch/main/graph/badge.svg)](https://codecov.io/gh/yourusername/docsum)
+[![Doctests](https://github.com/jogo2002/docsum/actions/workflows/doctest.yml/badge.svg)](https://github.com/jogo2002/docsum/actions/workflows/doctest.yml)
+[![Lint](https://github.com/jogo2002/docsum/actions/workflows/lint.yml/badge.svg)](https://github.com/jogo2002/docsum/actions/workflows/lint.yml)
+[![Integration Tests](https://github.com/jogo2002/docsum/actions/workflows/integration.yml/badge.svg)](https://github.com/jogo2002/docsum/actions/workflows/integration.yml)
+[![PyPI version](https://img.shields.io/pypi/v/docsum.svg)](https://pypi.org/project/LLM-Lab-Setup/)
+[![codecov](https://codecov.io/gh/jogo2002/docsum/branch/main/graph/badge.svg)](https://codecov.io/gh/jogo2002/docsum)
 
 ![Animated terminal demo](demo.gif)
 
