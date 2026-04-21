@@ -11,6 +11,9 @@ A command-line tool for chat-based file utilities, including calculation, file l
 
 ![Animated terminal demo](demo.gif)
 
+<p align="center"><img src="demo.gif?raw=true"/></p>
+
+
 ---
 
 ## Usage Examples
