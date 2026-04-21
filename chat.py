@@ -36,7 +36,12 @@ class Chat:
         self.messages = [
             {
                 "role": "system",
-                "content": "Write the output in 1-2 sentences",
+                "content": """You are a helpful assistant with access to tools. When answering questions:
+- Use the calculate tool for mathematical expressions and arithmetic
+- Use the ls tool to list directory contents
+- Use the cat tool to read and display complete file contents
+- Use the grep tool to search for patterns within files
+Be concise and direct in your responses.""",
             }
         ]
 
@@ -278,6 +283,7 @@ class Chat:
             messages=messages,
             tools=tools,
             tool_choice="auto",
+            temperature=0.0,
         )
 
         response_message = response.choices[0].message
