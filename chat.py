@@ -6,6 +6,9 @@ from tools.cat import cat as cat_tool
 from tools.grep import grep as grep_tool
 from tools.ls import ls as ls_tool
 from tools.compact import compact as compact_tool
+from tools.doctests import doctests as doctests_tool
+from tools.write_file import write_file as write_file_tool, write_files as write_files_tool
+from tools.rm import rm as rm_tool
 
 try:
     from groq import Groq
@@ -41,6 +44,10 @@ class Chat:
 - Use the ls tool to list directory contents
 - Use the cat tool to read and display complete file contents
 - Use the grep tool to search for patterns within files
+- Use the doctests tool to run doctests on a Python file
+- Use the write_file tool to write a single file and commit it to git
+- Use the write_files tool to write multiple files and commit them to git
+- Use the rm tool to delete files matching a glob pattern and commit the removal
 Be concise and direct in your responses.""",
             }
         ]
@@ -130,6 +137,54 @@ Be concise and direct in your responses.""",
         ''
         """
         return grep_tool(regex, filepath)
+
+    def doctests(self, path):
+        """Run doctests on a Python file and return the output.
+
+        >>> chat = Chat()
+        >>> result = chat.doctests('test_files/sample_add.py')
+        >>> 'ok' in result or 'passed' in result
+        True
+        >>> chat.doctests('/etc/passwd')
+        'Error: Absolute paths and directory traversal are not allowed.'
+        """
+        return doctests_tool(path)
+
+    def write_file(self, path, contents, commit_message):
+        """Write a single file to disk and commit it to git.
+
+        >>> import os
+        >>> chat = Chat()
+        >>> result = chat.write_file('_chat_wf_test.txt', 'hello', 'test write')
+        >>> 'written' in result
+        True
+        >>> os.remove('_chat_wf_test.txt')
+        """
+        return write_file_tool(path, contents, commit_message)
+
+    def write_files(self, files, commit_message):
+        """Write multiple files to disk and commit them to git.
+
+        >>> import os
+        >>> chat = Chat()
+        >>> result = chat.write_files([{'path': '_chat_wfs_test.txt', 'contents': 'hi'}], 'test multi')
+        >>> 'written' in result
+        True
+        >>> os.remove('_chat_wfs_test.txt')
+        """
+        return write_files_tool(files, commit_message)
+
+    def rm(self, path):
+        """Delete files matching a glob pattern and commit the removal to git.
+
+        >>> from pathlib import Path
+        >>> chat = Chat()
+        >>> _ = Path('_chat_rm_test.txt').write_text('x', encoding='utf-8')
+        >>> result = chat.rm('_chat_rm_test.txt')
+        >>> 'removed' in result
+        True
+        """
+        return rm_tool(path)
 
     def run_conversation(self, user_prompt):
         """Run a conversation through the configured Groq client.
@@ -231,6 +286,94 @@ Be concise and direct in your responses.""",
                     },
                 },
             },
+            {
+                "type": "function",
+                "function": {
+                    "name": "doctests",
+                    "description": "Run doctests on a Python file and return the verbose output",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "path": {
+                                "type": "string",
+                                "description": "The relative path to the Python file to test",
+                            }
+                        },
+                        "required": ["path"],
+                    },
+                },
+            },
+            {
+                "type": "function",
+                "function": {
+                    "name": "write_file",
+                    "description": "Write a single file to disk with the given contents and commit it to git",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "path": {
+                                "type": "string",
+                                "description": "The relative path of the file to write",
+                            },
+                            "contents": {
+                                "type": "string",
+                                "description": "The contents to write to the file",
+                            },
+                            "commit_message": {
+                                "type": "string",
+                                "description": "The commit message describing the change",
+                            },
+                        },
+                        "required": ["path", "contents", "commit_message"],
+                    },
+                },
+            },
+            {
+                "type": "function",
+                "function": {
+                    "name": "write_files",
+                    "description": "Write multiple files to disk and commit them to git in a single commit",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "files": {
+                                "type": "array",
+                                "items": {
+                                    "type": "object",
+                                    "properties": {
+                                        "path": {"type": "string"},
+                                        "contents": {"type": "string"},
+                                    },
+                                    "required": ["path", "contents"],
+                                },
+                                "description": "List of files with path and contents to write",
+                            },
+                            "commit_message": {
+                                "type": "string",
+                                "description": "The commit message describing the change",
+                            },
+                        },
+                        "required": ["files", "commit_message"],
+                    },
+                },
+            },
+            {
+                "type": "function",
+                "function": {
+                    "name": "rm",
+                    "description": "Delete files matching a glob pattern and commit the removal to git",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "path": {
+                                "type": "string",
+                                "description": "The file path or glob pattern of files to delete",
+                            }
+                        },
+                        "required": ["path"],
+                    },
+                },
+            },
         ]
 
         response = self.client.chat.completions.create(
@@ -250,6 +393,10 @@ Be concise and direct in your responses.""",
                 "ls": self.ls,
                 "grep": self.grep,
                 "cat": self.cat,
+                "doctests": self.doctests,
+                "write_file": self.write_file,
+                "write_files": self.write_files,
+                "rm": self.rm,
             }
 
             messages.append(response_message)
@@ -324,6 +471,8 @@ def main(chat=None, inputs=None):
     ...     def ls(self, path=None): return f"LS:{path}"
     ...     def grep(self, r, f): return f"GREP:{r}:{f}"
     ...     def cat(self, f): return f"CAT:{f}"
+    ...     def doctests(self, p): return f"DOCTESTS:{p}"
+    ...     def rm(self, p): return f"RM:{p}"
     ...     def run_conversation(self, p): return f"CHAT:{p}"
     ...     def compact(self): return "Conversation compacted."
     >>> main(chat=NewChat(), inputs=[
@@ -337,6 +486,10 @@ def main(chat=None, inputs=None):
     ...     "/grep a file.txt",
     ...     "/cat",
     ...     "/cat file.txt",
+    ...     "/doctests",
+    ...     "/doctests file.py",
+    ...     "/rm",
+    ...     "/rm file.txt",
     ...     "/compact",
     ...     "/unknown cmd",
     ...     "hello",
@@ -352,6 +505,10 @@ def main(chat=None, inputs=None):
     GREP:a:file.txt
     Usage: /cat <filename>
     CAT:file.txt
+    Usage: /doctests <path>
+    DOCTESTS:file.py
+    Usage: /rm <path>
+    RM:file.txt
     Conversation compacted.
     Unknown command: unknown
     CHAT:hello
@@ -403,6 +560,16 @@ def main(chat=None, inputs=None):
                         print("Usage: /cat <filename>")
                         continue
                     print(chat.cat(args[0]))
+                elif command == "doctests":
+                    if len(args) != 1:
+                        print("Usage: /doctests <path>")
+                        continue
+                    print(chat.doctests(args[0]))
+                elif command == "rm":
+                    if len(args) != 1:
+                        print("Usage: /rm <path>")
+                        continue
+                    print(chat.rm(args[0]))
                 elif command == "compact":
                     print(chat.compact())
                 else:
