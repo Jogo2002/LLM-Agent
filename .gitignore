@@ -3,3 +3,9 @@ venv
 __pycache__
 .coverage
 node_modules/
+package-lock.json
+scratch.txt
+testtext.txt
+htmlcov/
+.coveragerc
+test_files/

@@ -8,3 +8,6 @@ from .cat import cat
 from .grep import grep
 from .ls import ls
 from .compact import compact
+from .doctests import doctests
+from .write_file import write_file, write_files
+from .rm import rm
