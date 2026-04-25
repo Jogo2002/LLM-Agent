@@ -38,3 +38,26 @@ def grep(regex, filepath):
             continue
 
     return '\n'.join(output)
+
+
+grep_schema = {
+    "type": "function",
+    "function": {
+        "name": "grep",
+        "description": "Use this to search for patterns within files. Searches for lines matching a regex pattern in files matching a glob pattern.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "regex": {
+                    "type": "string",
+                    "description": "The regex pattern to search for",
+                },
+                "filepath": {
+                    "type": "string",
+                    "description": "The file path or glob pattern to search in",
+                },
+            },
+            "required": ["regex", "filepath"],
+        },
+    },
+}

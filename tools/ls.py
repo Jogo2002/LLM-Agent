@@ -38,3 +38,22 @@ def ls(path=None):
         return json.dumps({"files": files})
     except Exception as e:
         return json.dumps({"error": str(e)})
+
+
+ls_schema = {
+    "type": "function",
+    "function": {
+        "name": "ls",
+        "description": "Use this when the user asks what files are in a directory or wants to list directory contents. Lists files and directories at a path. Do NOT use this to read file contents.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "path": {
+                    "type": "string",
+                    "description": "Optional directory path to list files from",
+                }
+            },
+            "required": [],
+        },
+    },
+}

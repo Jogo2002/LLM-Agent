@@ -25,3 +25,22 @@ def cat(filename):
             return f.read()
     except (FileNotFoundError, UnicodeDecodeError) as e:
         return f"Error: {e}"
+
+
+cat_schema = {
+    "type": "function",
+    "function": {
+        "name": "cat",
+        "description": "Use this when the user asks to read, view, show, or display a file's content. Reads and returns the complete contents of a single file.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "filename": {
+                    "type": "string",
+                    "description": "The name of the file to read",
+                }
+            },
+            "required": ["filename"],
+        },
+    },
+}

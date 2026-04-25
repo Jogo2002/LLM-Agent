@@ -28,3 +28,25 @@ def doctests(path):
         text=True,
     )
     return result.stdout + result.stderr
+
+
+doctests_schema = {
+    "type": "function",
+    "function": {
+        "name": "doctests",
+        "description": "Use this to run doctests on a Python file. Returns verbose doctest output showing which tests passed or failed.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "path": {
+                    "type": "string",
+                    "description": "The relative path to the Python file to test",
+                }
+            },
+            "required": ["path"],
+        },
+    },
+}
+
+if __name__ == "__main__":
+    print(doctests(sys.argv[1]))

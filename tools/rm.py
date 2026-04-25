@@ -58,3 +58,22 @@ def rm(path):
 
     except Exception as e:
         return f"Error: {e}"
+
+
+rm_schema = {
+    "type": "function",
+    "function": {
+        "name": "rm",
+        "description": "Use this to delete files matching a glob pattern and commit the removal to git.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "path": {
+                    "type": "string",
+                    "description": "The file path or glob pattern of files to delete",
+                }
+            },
+            "required": ["path"],
+        },
+    },
+}

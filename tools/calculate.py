@@ -23,3 +23,22 @@ def calculate(expression):
         return json.dumps({"result": result})
     except Exception:
         return json.dumps({"error": "Invalid expression"})
+
+
+calculate_schema = {
+    "type": "function",
+    "function": {
+        "name": "calculate",
+        "description": "Use this for mathematical expressions and arithmetic. Evaluate a mathematical expression and return the result.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "expression": {
+                    "type": "string",
+                    "description": "The mathematical expression to evaluate",
+                }
+            },
+            "required": ["expression"],
+        },
+    },
+}

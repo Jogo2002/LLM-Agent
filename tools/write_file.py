@@ -86,3 +86,60 @@ def write_file(path, contents, commit_message):
     'Error: Absolute paths and directory traversal are not allowed.'
     """
     return write_files([{"path": path, "contents": contents}], commit_message)
+
+
+write_file_schema = {
+    "type": "function",
+    "function": {
+        "name": "write_file",
+        "description": "Use this to write a single file to disk and commit it to git. Provide the path, contents, and a commit message.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "path": {
+                    "type": "string",
+                    "description": "The relative path of the file to write",
+                },
+                "contents": {
+                    "type": "string",
+                    "description": "The contents to write to the file",
+                },
+                "commit_message": {
+                    "type": "string",
+                    "description": "The commit message describing the change",
+                },
+            },
+            "required": ["path", "contents", "commit_message"],
+        },
+    },
+}
+
+write_files_schema = {
+    "type": "function",
+    "function": {
+        "name": "write_files",
+        "description": "Use this to write multiple files at once and commit them to git in a single commit. Prefer this over write_file when writing more than one file.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "files": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "path": {"type": "string"},
+                            "contents": {"type": "string"},
+                        },
+                        "required": ["path", "contents"],
+                    },
+                    "description": "List of files with path and contents to write",
+                },
+                "commit_message": {
+                    "type": "string",
+                    "description": "The commit message describing the change",
+                },
+            },
+            "required": ["files", "commit_message"],
+        },
+    },
+}
