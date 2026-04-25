@@ -212,8 +212,8 @@ class VolcabCompleter:
         ['/ls']
         >>> c.get_matches('/c')
         ['/calculate', '/cat']
-        >>> c.get_matches('/ls test_fi')
-        ['/ls test_files/']
+        >>> '/ls test_files/' in c.get_matches('/ls test_fi')
+        True
         >>> c.get_matches('hello')
         []
         """

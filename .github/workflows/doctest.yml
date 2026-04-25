@@ -20,5 +20,7 @@ jobs:
         pip install -r requirements.txt
     
     - name: Run doctests
+      env:
+        GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
       run: |
         python -m doctest chat.py tools/calculate.py tools/cat.py tools/grep.py tools/ls.py tools/doctests.py tools/compact.py tools/write_file.py tools/write_files.py tools/rm.py tools/pip_install.py -v
