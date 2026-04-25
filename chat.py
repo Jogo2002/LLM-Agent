@@ -1,5 +1,7 @@
+import glob
 import json
 import os
+import readline
 from dotenv import load_dotenv
 from tools.calculate import calculate, calculate_schema
 from tools.cat import cat, cat_schema
@@ -7,10 +9,12 @@ from tools.grep import grep, grep_schema
 from tools.ls import ls, ls_schema
 from tools.compact import compact
 from tools.doctests import doctests, doctests_schema
-from tools.write_file import write_file, write_files, write_file_schema, write_files_schema
+from tools.write_file import write_file, write_file_schema
+from tools.write_files import write_files, write_files_schema
 from tools.rm import rm, rm_schema
+from tools.pip_install import pip_install, pip_install_schema
 
-from groq import Groq
+from groq import Groq, BadRequestError
 
 load_dotenv()
 
@@ -98,15 +102,25 @@ class Chat:
             write_file_schema,
             write_files_schema,
             rm_schema,
+            pip_install_schema,
         ]
-
-        response = self.client.chat.completions.create(
-            model=self.model,
-            messages=messages,
-            tools=tools,
-            tool_choice="auto",
-            temperature=temperature,
-        )
+        
+        # this clause stops inadvertent tool calling errors
+        try:
+            response = self.client.chat.completions.create(
+                model=self.model,
+                messages=messages,
+                tools=tools,
+                tool_choice="auto",
+                temperature=temperature,
+            )
+        except BadRequestError:
+            response = self.client.chat.completions.create(
+                model=self.model,
+                messages=messages,
+                temperature=temperature,
+            )
+            return response.choices[0].message.content
 
         response_message = response.choices[0].message
         tool_calls = response_message.tool_calls
@@ -121,6 +135,7 @@ class Chat:
                 "write_file": write_file,
                 "write_files": write_files,
                 "rm": rm,
+                "pip_install": pip_install,
             }
 
             messages.append(response_message)
@@ -187,6 +202,40 @@ class Chat:
         return result
 
 
+commands = ['calculate', 'ls', 'grep', 'cat', 'doctests', 'rm', 'compact', 'write_file', 'write_files', 'pip_install']
+
+
+class VolcabCompleter:
+    def __init__(self, commands):
+        self.commands = commands
+
+    def get_matches(self, line):
+        """Return completion matches for the given line buffer.
+
+        >>> c = VolcabCompleter(['calculate', 'ls', 'cat'])
+        >>> c.get_matches('/l')
+        ['/ls']
+        >>> c.get_matches('/c')
+        ['/calculate', '/cat']
+        >>> c.get_matches('/ls test_fi')
+        ['/ls test_files/']
+        >>> c.get_matches('hello')
+        []
+        """
+        if not line.startswith('/'):
+            return []
+        inner = line[1:]
+        if ' ' not in inner:
+            return ['/' + c for c in self.commands if c.startswith(inner)]
+        cmd, _, partial = inner.partition(' ')
+        file_matches = glob.glob(partial + '*')
+        return ['/' + cmd + ' ' + (m + '/' if os.path.isdir(m) else m) for m in file_matches]
+
+    def complete(self, text, state):
+        matches = self.get_matches(readline.get_line_buffer())
+        return (matches + [None])[state]
+
+
 def main(chat=None, temperature=0.0):
     """Starts the chat command line interface.
 
@@ -219,6 +268,11 @@ def main(chat=None, temperature=0.0):
     if os.path.isfile("AGENTS.md"):
         print(cat("AGENTS.md"))
         print("I read the agents.md file")
+
+    completer = VolcabCompleter(commands)
+    readline.set_completer(completer.complete)
+    readline.set_completer_delims('')
+    readline.parse_and_bind('tab: complete')
 
     try:
         while True:
@@ -260,12 +314,17 @@ def main(chat=None, temperature=0.0):
                         print("Usage: /rm <path>")
                         continue
                     print(rm(args[0]))
+                elif command == "pip_install":
+                    if len(args) != 1:
+                        print("Usage: /pip_install <library_name>")
+                        continue
+                    print(pip_install(args[0]))
                 elif command == "compact":
                     print(chat.compact())
                 else:
                     print(f"Unknown command: {command}")
             else:
-                print(chat.run_conversation(user_input))
+                print(chat.run_conversation(user_input, temperature=temperature))
     except KeyboardInterrupt:
         print()
 

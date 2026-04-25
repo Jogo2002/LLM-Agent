@@ -11,13 +11,11 @@ def compact(messages, client, model):
     the LLM, and returns a summary string that can be used to replace the conversation.
 
     >>> from chat import Chat
-    >>> chat = Chat(temperature=0.0)
+    >>> chat = Chat()
     >>> chat.messages.append({"role": "user", "content": "What files are in the directory?"})
     >>> chat.messages.append({"role": "assistant", "content": "Here are the files..."})
     >>> result = compact(chat.messages, chat.client, chat.model)
     >>> 'Conversation compacted' in result
-    True
-    >>> isinstance(result, str) and len(result) > 0
     True
     """
 
