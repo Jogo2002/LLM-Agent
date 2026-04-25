@@ -38,26 +38,22 @@ def rm(path):
     if PurePath(path).is_absolute() or any(part == ".." for part in PurePath(path).parts):
         return "Error: Absolute paths and directory traversal are not allowed."
 
-    try:
-        matched = glob.glob(path)
-        if not matched:
-            return f"Error: No files matched the pattern: {path}"
+    matched = glob.glob(path)
+    if not matched:
+        return f"Error: No files matched the pattern: {path}"
 
-        repo = git.Repo(".")
-        removed = []
-        for f in matched:
-            os.remove(f)
-            try:
-                repo.index.remove([f])
-            except git.exc.GitCommandError:
-                pass  # file was untracked; no index entry to remove
-            removed.append(f)
+    repo = git.Repo(".")
+    removed = []
+    for f in matched:
+        os.remove(f)
+        try:
+            repo.index.remove([f])
+        except git.exc.GitCommandError:
+            pass  # file was untracked; no index entry to remove
+        removed.append(f)
 
-        repo.index.commit(f"[docchat] rm {path}")
-        return f"Files removed and committed: {', '.join(removed)}"
-
-    except Exception as e:
-        return f"Error: {e}"
+    repo.index.commit(f"[docchat] rm {path}")
+    return f"Files removed and committed: {', '.join(removed)}"
 
 
 rm_schema = {

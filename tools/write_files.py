@@ -21,20 +21,24 @@ def _validate_path(path):
 
 
 def write_files(files, commit_message):
-    """Write multiple files to disk and commit them to git.
+    """Write multiple files and commit them to git.
 
-    Each item in files must be a dict with 'path' and 'contents' keys.
+    Each item in files must be a dictionary with 'path' and 'contents' keys.
     Returns doctest output for any .py files written, otherwise a success message.
 
-    >>> from pathlib import Path
+    >>> import os
     >>> write_files([{'path': 'test_files/_wf_fixture.txt', 'contents': 'hello'}], 'test commit')
     'Files written and committed: test_files/_wf_fixture.txt'
+    >>> os.remove('test_files/_wf_fixture.txt')
     >>> result = write_files([{'path': 'test_files/_wf_fixture.py', 'contents': 'x = 1'}], 'test py commit')
     >>> 'Test passed.' in result
     True
+    >>> os.remove('test_files/_wf_fixture.py')
     >>> multi = [{'path': 'test_files/_wf_fixture_a.txt', 'contents': 'a'}, {'path': 'test_files/_wf_fixture_b.txt', 'contents': 'b'}]
     >>> write_files(multi, 'multi commit')
     'Files written and committed: test_files/_wf_fixture_a.txt, test_files/_wf_fixture_b.txt'
+    >>> os.remove('test_files/_wf_fixture_a.txt')
+    >>> os.remove('test_files/_wf_fixture_b.txt')
     >>> write_files([{'path': '/etc/passwd', 'contents': 'x'}], 'bad')
     'Error: Absolute paths and directory traversal are not allowed.'
     >>> write_files([{'path': '../evil.txt', 'contents': 'x'}], 'bad')
@@ -68,8 +72,7 @@ def write_files(files, commit_message):
 
     except ValueError as e:
         return f"Error: {e}"
-    except Exception as e:
-        return f"Error: {e}"
+
 
 
 write_files_schema = {

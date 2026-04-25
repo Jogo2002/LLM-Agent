@@ -29,13 +29,11 @@ def grep(regex, filepath):
     output = []
 
     for file_path in files:
-        try:
-            with open(file_path, 'r', encoding='utf-8') as f:
-                for line in f:
-                    if re.search(regex, line):
-                        output.append(line.rstrip('\n'))
-        except (FileNotFoundError, UnicodeDecodeError, OSError):
-            continue
+        with open(file_path, 'r', encoding='utf-8') as f:
+            for line in f:
+                if re.search(regex, line):
+                    output.append(line.rstrip('\n'))
+
 
     return '\n'.join(output)
 

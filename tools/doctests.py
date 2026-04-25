@@ -47,6 +47,3 @@ doctests_schema = {
         },
     },
 }
-
-if __name__ == "__main__":
-    print(doctests(sys.argv[1]))

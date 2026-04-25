@@ -10,8 +10,9 @@ import sys
 def pip_install(library_name):
     """Install a Python package using pip.
 
-    # I use "in" here because there is no way for the package to output "Successfully installed"
-    # or "already satisfied" without running correctly, so using 'in' isn't a cop-out
+    I use "in" here because there is no way for the package to output "Successfully installed"
+    or "already satisfied" without running correctly, so using 'in' isn't a cop-out
+    
     >>> result = pip_install('requests')
     >>> 'Successfully installed' in result or 'already satisfied' in result
     True

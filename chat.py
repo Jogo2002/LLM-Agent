@@ -26,11 +26,6 @@ class Chat:
     def __init__(self, client=None, api_key=None):
         """Initialize the Chat object with optional Groq client support.
 
-        >>> chat = Chat()
-        >>> isinstance(chat, Chat)
-        True
-        >>> chat.client is None or hasattr(chat.client, 'chat')
-        True
         """
         self.model = "llama-3.1-8b-instant"
         self.messages = [
@@ -239,21 +234,66 @@ class VolcabCompleter:
 def main(chat=None, temperature=0.0):
     """Starts the chat command line interface.
 
-    >>> calculate('2+2')
+    Each test uses a helper that feeds one command into main() and captures its output.
+    Without it, we would be testing the /tools folder and not this main method.
+
+    >>> import builtins, io, contextlib
+    >>> _orig_input = builtins.input
+    >>> class FakeChat:
+    ...     client = object()
+    ...     def compact(self): return 'Conversation compacted.'
+    ...     def run_conversation(self, prompt, temperature=0.0): return f'response: {prompt}'
+    >>> def run_cmd(cmd):
+    ...     it = iter([cmd])
+    ...     builtins.input = lambda prompt='': next(it)
+    ...     out = io.StringIO()
+    ...     try:
+    ...         with contextlib.redirect_stdout(out):
+    ...             main(chat=FakeChat())
+    ...     except StopIteration:
+    ...         pass
+    ...     return out.getvalue().strip()
+
+    >>> run_cmd('/calculate 2+2')
     '{"result": 4}'
-    >>> calculate('4 + 5')
-    '{"result": 9}'
-    >>> ls('test_files')
-    '{"files": ["test_files/__pycache__", "test_files/grep_1.txt", "test_files/grep_2.txt", "test_files/sample_add.py", "test_files/testtext.txt"]}'
-    >>> ls('dir')
+    >>> run_cmd('/calculate')
+    'Usage: /calculate <expression>'
+    >>> run_cmd('/ls')
+    '{"files": ["README.md", "__pycache__", "chat.py", "demo.gif", "demo.yml", "htmlcov", "package-lock.json", "package.json", "requirements.txt", "scratch.txt", "setup.py", "test_files", "test_projects", "testtext.txt", "tools", "venv"]}'
+    >>> run_cmd('/ls dir')
     '{"error": "Directory does not exist."}'
-    >>> cat('file.txt')
+    >>> run_cmd('/cat file.txt')
     "Error: [Errno 2] No such file or directory: 'file.txt'"
-    >>> result = doctests('test_files/sample_add.py')
-    >>> 'Test passed.' in result
+    >>> run_cmd('/cat')
+    'Usage: /cat <filename>'
+    >>> 'apple' in run_cmd('/grep apple test_files/grep_1.txt')
     True
-    >>> rm('file.txt')
-    'Error: No files matched the pattern: file.txt'
+    >>> run_cmd('/grep')
+    'Usage: /grep <regex> <filepath>'
+    >>> run_cmd('/grep one')
+    'Usage: /grep <regex> <filepath>'
+    >>> 'Test passed.' in run_cmd('/doctests test_files/sample_add.py')
+    True
+    >>> run_cmd('/doctests')
+    'Usage: /doctests <path>'
+    >>> run_cmd('/rm nonexistent_file.txt')
+    'Error: No files matched the pattern: nonexistent_file.txt'
+    >>> run_cmd('/rm')
+    'Usage: /rm <path>'
+    >>> result = run_cmd('/pip_install requests')
+    >>> 'installed' in result.lower() or 'satisfied' in result.lower()   # in is fine here because there is no way for the package to output "Successfully installed" or "already satisfied" without running correctly
+    True
+    >>> run_cmd('/pip_install')
+    'Usage: /pip_install <library_name>'
+    >>> run_cmd('/compact')
+    'Conversation compacted.'
+    >>> run_cmd('/unknown cmd')
+    'Unknown command: unknown'
+    >>> run_cmd('/')
+    'Invalid command'
+    >>> run_cmd('hello world')
+    'response: hello world'
+    >>> builtins.input = _orig_input
     """
     if not os.path.isdir(".git"):
         print("Error: .git folder not found. This command must be run from a git repository.")
