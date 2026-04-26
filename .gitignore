@@ -4,6 +4,7 @@ __pycache__
 .coverage
 node_modules/
 package-lock.json
+package.json
 scratch.txt
 testtext.txt
 htmlcov/
